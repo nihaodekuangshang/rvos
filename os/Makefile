@@ -1,16 +1,19 @@
 # Building
-TARGET := riscv64gc-unknown-none-elf
+TGT=riscv64-linux-gnu-
+CC := $(TGT)gcc
+LD := $(TGT)ld
+GDB := $(TGT)gdb
 MODE := release
-KERNEL_ELF := target/$(TARGET)/$(MODE)/rvos
+KERNEL_ELF := target/os
 KERNEL_BIN := $(KERNEL_ELF).bin
-DISASM_TMP := target/$(TARGET)/$(MODE)/asm
+DISASM_TMP := target/asm
 FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
 APPS := ../user/src/bin/*
 
 # BOARD
 BOARD := qemu
 SBI ?= opensbi
-BOOTLOADER := ./bootloader/$(SBI)-$(BOARD).bin
+BOOTLOADER := ../bootloader/$(SBI)-$(BOARD).bin
 
 # GUI
 GUI ?= off
@@ -27,22 +30,21 @@ endif
 KERNEL_ENTRY_PA := 0x80200000
 
 # Binutils
-OBJDUMP := rust-objdump --arch-name=riscv64
-OBJCOPY := rust-objcopy --binary-architecture=riscv64
+OBJDUMP := $(TGT)objdump --arch-name=riscv64
+OBJCOPY := $(TGT)objcopy #--binary-architecture=riscv64
 
 # Disassembly
 DISASM ?= -x
 
+# Object
+
+OBJ = target/entry.o
+
 # Run usertests or usershell
 TEST ?=
 
-build: env $(KERNEL_BIN) 
+build:  $(KERNEL_BIN) 
 
-env:
-	(rustup target list | grep "riscv64gc-unknown-none-elf (installed)") || rustup target add $(TARGET)
-	cargo install cargo-binutils
-	rustup component add rust-src
-	rustup component add llvm-tools-preview
 
 $(KERNEL_BIN): kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
@@ -54,14 +56,19 @@ fs-img: $(APPS)
 
 $(APPS):
 
-kernel:
+kernel: build_kernel
 	@echo Platform: $(BOARD)
 	@cp src/linker-$(BOARD).ld src/linker.ld
-	@cargo build --release
+	@$(LD) $(OBJ) -T src/linker.ld  -o $(KERNEL_ELF)
 	@rm src/linker.ld
 
+build_kernel:$(OBJ)
+
+target/%.o:src/%.s
+	$(CC)  $< -nostdlib  -c -o $@
+
 clean:
-	@cargo clean
+	@rm target/*.o $(KERNEL_ELF)
 
 disasm: kernel
 	@$(OBJDUMP) $(DISASM) $(KERNEL_ELF) | less
@@ -87,7 +94,7 @@ run-inner: build
 debug: build
 	@tmux new-session -d \
 		"qemu-system-riscv64 $(QEMU_ARGS) -s -S" && \
-		tmux split-window -h "gdb-multiarch -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'" && \
+		tmux split-window -h "$(GDB) -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'" && \
 		tmux -2 attach-session -d
 
 
@@ -95,6 +102,6 @@ gdbserver: build
 	@qemu-system-riscv64 $(QEMU_ARGS) -s -S
 
 gdbclient:
-	@riscv64-unknown-elf-gdb -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'
+	@$(GDB) -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'
 
 .PHONY: build env kernel clean disasm disasm-vim run-inner fs-img gdbserver gdbclient fdt

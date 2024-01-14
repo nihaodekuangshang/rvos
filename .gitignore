@@ -1,4 +1,4 @@
-/target
+os/target
 *.un~
 .root
 .ta*
