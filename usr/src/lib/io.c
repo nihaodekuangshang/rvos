@@ -1,5 +1,7 @@
-#include "io.h"
+#include "syscall.h"
 #include "string.h"
+#include "io.h"
+#include "kelarg.h"
 
 int sprint(char *buf, const char *fmt, ...)
 {
@@ -292,8 +294,8 @@ int sprint(char *buf, const char *fmt, ...)
  }
 int putchar(int ch)
 {
-	char c = ch;
-	int i = print(c);
+	print("%c",ch);
+	return 1;
 }
 int puts(const char *str)
 {

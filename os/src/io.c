@@ -1,5 +1,7 @@
 #include "kelio.h"
+#include "string.h"
 #include "io.h"
+#include "kelarg.h"
 
 int sprint(char *buf, const char *fmt, ...)
 {
@@ -292,8 +294,8 @@ int sprint(char *buf, const char *fmt, ...)
  }
 int putchar(int ch)
 {
-    _print_c(ch);
-    return 1;
+	_print_c(ch);
+	return 1;
 }
 int puts(const char *str)
 {
@@ -310,6 +312,6 @@ int print(const char *fmt, ...)
     va_start(args, fmt);
     i = vsprint(buf,fmt,args);
 
-    _print_str(buf);
+	_print_str(buf);
     return i;
 }

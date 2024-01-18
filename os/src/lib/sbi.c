@@ -18,11 +18,11 @@ struct Sbiret ecall(
 		unsigned long arg0, 
 		unsigned long arg1, 
 		unsigned long arg2) {
-	register unsigned long a0 asm("a0") = arg0;
-	register unsigned long a1 asm("a1") = arg1;
-	register unsigned long a2 asm("a2") = arg2;
-	register unsigned long a6 asm("a6") = fid;
-	register unsigned long a7 asm("a7") = eid;
+	register unsigned long a0 __asm__("a0") = arg0;
+	register unsigned long a1 __asm__("a1") = arg1;
+	register unsigned long a2 __asm__("a2") = arg2;
+	register unsigned long a6 __asm__("a6") = fid;
+	register unsigned long a7 __asm__("a7") = eid;
         __asm__ __volatile__(
             "ecall"
 			:"+r"(a0),"+r"(a1)

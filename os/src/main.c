@@ -1,6 +1,7 @@
 #include "sbi.h"
 #include "io.h"
 
+
 void sbss();
 void ebss();
 void clearBss();
@@ -14,7 +15,7 @@ int main(int argc, char **argv, char** envp)
 //	 if(thisEnv == ""
 //	}
 	clearBss();
-	print("jk");
+	print("this is a test: %x",16);
 	shutdown();
 	while (1) {}
 	return 0;

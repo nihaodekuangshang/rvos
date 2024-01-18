@@ -35,7 +35,7 @@ OBJDUMP := $(TGT)objdump
 OBJCOPY := $(TGT)objcopy #--binary-architecture=riscv64
 
 # Disassembly
-DISASM ?= -D
+DISASM ?= -D -S
 
 # Object
 
@@ -68,13 +68,13 @@ kernel: build_kernel
 build_kernel:$(OBJ) $(LIB)
 
 target/%.o:src/%.s
-	$(CC)  $< -nostdlib  -c -o $@
+	$(CC)  $< -nostdlib -g  -c -o $@
 
 target/%.o:src/%.c
-	$(CC)  $< -nostdlib -std=c23  -I./src/include  -c -o $@
+	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include  -c -o $@
 
 target/%.a:src/lib/%.c
-	$(CC)  $< -nostdlib -std=c23   -I./src/include -c -o target/a.out
+	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include -c -o target/a.out
 	$(AR)  -rc $@  target/a.out
 	@rm target/a.out
 
