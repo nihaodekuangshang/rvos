@@ -3,6 +3,7 @@ TGT=riscv64-linux-gnu-
 CC := $(TGT)gcc
 LD := $(TGT)ld
 GDB := $(TGT)gdb
+AR := $(TGT)ar
 MODE := release
 KERNEL_ELF := target/os
 KERNEL_BIN := $(KERNEL_ELF).bin
@@ -30,15 +31,17 @@ endif
 KERNEL_ENTRY_PA := 0x80200000
 
 # Binutils
-OBJDUMP := $(TGT)objdump --arch-name=riscv64
+OBJDUMP := $(TGT)objdump 
 OBJCOPY := $(TGT)objcopy #--binary-architecture=riscv64
 
 # Disassembly
-DISASM ?= -x
+DISASM ?= -D
 
 # Object
 
-OBJ = target/entry.o
+OBJ = target/entry.o target/main.o  target/io.o  
+
+LIB := target/string.a  target/kelio.a  target/sbi.a
 
 # Run usertests or usershell
 TEST ?=
@@ -59,23 +62,36 @@ $(APPS):
 kernel: build_kernel
 	@echo Platform: $(BOARD)
 	@cp src/linker-$(BOARD).ld src/linker.ld
-	@$(LD) $(OBJ) -T src/linker.ld  -o $(KERNEL_ELF)
+	@$(LD) $(OBJ) $(LIB)  -T src/linker.ld  -o $(KERNEL_ELF)
 	@rm src/linker.ld
 
-build_kernel:$(OBJ)
+build_kernel:$(OBJ) $(LIB)
 
 target/%.o:src/%.s
 	$(CC)  $< -nostdlib  -c -o $@
 
+target/%.o:src/%.c
+	$(CC)  $< -nostdlib -std=c23  -I./src/include  -c -o $@
+
+target/%.a:src/lib/%.c
+	$(CC)  $< -nostdlib -std=c23   -I./src/include -c -o target/a.out
+	$(AR)  -rc $@  target/a.out
+	@rm target/a.out
+
+
 clean:
-	@rm target/*.o $(KERNEL_ELF)
+	@rm target/*.o   $(KERNEL_ELF)
+
+clean_all:
+	@rm target/*.o target/*.a  $(KERNEL_ELF)
+
 
 disasm: kernel
 	@$(OBJDUMP) $(DISASM) $(KERNEL_ELF) | less
 
 disasm-vim: kernel
 	@$(OBJDUMP) $(DISASM) $(KERNEL_ELF) > $(DISASM_TMP)
-	@nvim $(DISASM_TMP)
+	@vim $(DISASM_TMP)
 	@rm $(DISASM_TMP)
 
 run: run-inner

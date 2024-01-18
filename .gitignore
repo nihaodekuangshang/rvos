@@ -1,4 +1,7 @@
-os/target
-*.un~
-.root
-.ta*
+target/
+.*
+*.a
+*.o
+!.git*
+bin/
+compile_commands.json
