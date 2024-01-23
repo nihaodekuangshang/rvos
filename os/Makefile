@@ -4,13 +4,18 @@ CC := $(TGT)gcc
 LD := $(TGT)ld
 GDB := $(TGT)gdb
 AR := $(TGT)ar
-MODE := release
+MODE := dubug
 KERNEL_ELF := target/os
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/asm
-FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
-APPS := ../user/src/bin/*
+FS_IMG := ../user/target/fs.img
+APPS := ../user/src/*
+TARGET_DIR := ./target
 
+#Flags
+INCLUDE := -I./src/include/ -I./src/lib/include/ \
+	   -I./src/trap/include/ -I./src/syscall/include/
+CC_FLAGS := -nostdlib -std=c2x -g  $(INCLUDE) -c
 # BOARD
 BOARD := qemu
 SBI ?= opensbi
@@ -23,8 +28,9 @@ ifeq ($(GUI), off)
 endif
 
 # Building mode argument
-ifeq ($(MODE), release)
-	MODE_ARG := --release
+ifeq ($(MODE), debug)
+	CC_FLAGS += -g
+	DISASM := -D -S
 endif
 
 # KERNEL ENTRY
@@ -35,7 +41,17 @@ OBJDUMP := $(TGT)objdump
 OBJCOPY := $(TGT)objcopy #--binary-architecture=riscv64
 
 # Disassembly
-DISASM ?= -D -S
+DISASM ?= -D
+
+
+#File
+
+C_DIR = ./src ./src/trap ./src/syscall
+C_FILE := $(foreach dir,$(C_DIR),$(wildcard $(dir)/*.c ))
+ASM_DIR := ./src ./src/trap 
+ASM_FILE := $(foreach dir,$(ASM_DIR),$(wildcard $(dir)/*.S ))
+
+
 
 # Object
 
@@ -43,19 +59,31 @@ OBJ = target/entry.o target/main.o  target/io.o
 
 LIB := target/string.a  target/kelio.a  target/sbi.a
 
+define \n 
+
+
+
+endef
+
 # Run usertests or usershell
 TEST ?=
 
-build:  $(KERNEL_BIN) 
+build: env  $(KERNEL_BIN) 
 
 
-$(KERNEL_BIN): kernel
+env:
+	@bash env.sh
+
+$(KERNEL_BIN):apps  kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
+
+apps: $(APPS)
+	@cd ../usr && make build TEST=$(TEST)
 
 fs-img: $(APPS)
 	@cd ../user && make build TEST=$(TEST)
 	@rm -f $(FS_IMG)
-	@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/riscv64gc-unknown-none-elf/release/
+	#@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/riscv64gc-unknown-none-elf/release/
 
 $(APPS):
 
@@ -65,13 +93,23 @@ kernel: build_kernel
 	@$(LD) $(OBJ) $(LIB)  -T src/linker.ld  -o $(KERNEL_ELF)
 	@rm src/linker.ld
 
-build_kernel:$(OBJ) $(LIB)
+build_kernel:build_c build_asm $(LIB)
 
-target/%.o:src/%.s
-	$(CC)  $< -nostdlib -g  -c -o $@
 
-target/%.o:src/%.c
-	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include  -c -o $@
+build_c:
+	$(foreach file,$(C_FILE),$(CC) $(file) $(CC_FLAGS) -o \
+		$(patsubst %.c,$(TARGET_DIR)/%.o,$(notdir $(file))) ${\n})
+
+
+build_asm:
+	bash ./build.sh
+	$(foreach file,$(ASM_FILE),$(CC) $(file) -nostdlib -g -c -o  \
+		$(patsubst %.S,$(TARGET_DIR)/%.o,$(notdir $(file))) ${\n})
+#target/%.o:src/%.s
+	#$(CC)  $< -nostdlib -g  -c -o $@
+#
+#target/%.o:src/%.c
+	#$(CC)  $< -nostdlib -std=c2x -g  -I./src/include  -c -o $@
 
 target/%.a:src/lib/%.c
 	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include -c -o target/a.out

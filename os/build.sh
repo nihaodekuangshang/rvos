@@ -27,7 +27,7 @@ let "apps_len++"
 
 c=0
 apps_len=${#apps[@]}
-target_path="../usr/target/"
+target_path="../usr/bin/"
 while (($c < $apps_len)) 
 do
 	echo "
@@ -35,7 +35,7 @@ do
     .global app_${c}_start
     .global app_${c}_end
 app_${c}_start:
-    .incbin \"${target_path}${apps[$c]}.bin\"
+    .incbin \"${target_path}${apps[$c]}\"
 app_${c}_end:"        >> $filelink
 	let "c++"
 done
