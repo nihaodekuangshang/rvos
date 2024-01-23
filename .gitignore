@@ -3,5 +3,6 @@ target/
 *.a
 *.o
 !.git*
+test/
 bin/
 compile_commands.json
