@@ -11,11 +11,14 @@ DISASM_TMP := target/asm
 FS_IMG := ../user/target/fs.img
 APPS := ../user/src/*
 TARGET_DIR := ./target
+SYSROOT ?= ../sysroot
 
 #Flags
-INCLUDE := -I./src/include/ -I./src/lib/include/ \
-	   -I./src/trap/include/ -I./src/syscall/include/
-CC_FLAGS := -nostdlib -std=c2x -g  $(INCLUDE) -c
+INCLUDE := -I./src/include/ -I./src/lib/include/
+CC_FLAGS := -nostdlib -std=c2x  --sysroot=../sysroot/ \
+	    -isystem=/usr/include/ $(INCLUDE) -c
+
+LIBINCLUDE := -L$(SYSROOT)/usr/lib
 # BOARD
 BOARD := qemu
 SBI ?= opensbi
@@ -55,9 +58,9 @@ ASM_FILE := $(foreach dir,$(ASM_DIR),$(wildcard $(dir)/*.S ))
 
 # Object
 
-OBJ = target/entry.o target/main.o  target/io.o  
+OBJ = target/entry.o target/main.o   
 
-LIB := target/string.a  target/kelio.a  target/sbi.a
+LIBS := $(SYSROOT)/usr/lib/libk.a  target/kelio.a  target/sbi.a
 
 define \n 
 
@@ -90,7 +93,7 @@ $(APPS):
 kernel: build_kernel
 	@echo Platform: $(BOARD)
 	@cp src/linker-$(BOARD).ld src/linker.ld
-	@$(LD) $(OBJ) $(LIB)  -T src/linker.ld  -o $(KERNEL_ELF)
+	@$(LD) $(OBJ) $(LIBS) -T src/linker.ld  -o $(KERNEL_ELF)
 	@rm src/linker.ld
 
 build_kernel:build_c build_asm $(LIB)
@@ -113,7 +116,7 @@ build_asm:
 
 target/%.a:src/lib/%.c
 	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include -c -o target/a.out
-	$(AR)  -rc $@  target/a.out
+	$(AR)  -rcs $@  target/a.out
 	@rm target/a.out
 
 
@@ -135,6 +138,7 @@ disasm-vim: kernel
 run: run-inner
 
 QEMU_ARGS := -machine virt \
+			 -m 512M  \
 			 -nographic \
 			 -bios $(BOOTLOADER) \
 			 -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) 

@@ -1,9 +1,10 @@
-#ifndef __IO__RVOS_H
-#define __IO__RVOS_H
-#define STDOUT 1
-#include "keldef.h"
-#include "kelarg.h"
+#ifndef _STDIO_H
+#define _STDIO_H 1
 
+#include <sys/cdefs.h>
+#include <stdarg.h>
+
+#define EOF (-1)
 
  #define ZEROPAD    1       /* pad with zero */
  #define SIGN   2       /* unsigned/signed long */
@@ -19,9 +20,17 @@
     n = ((unsigned long) n) / (unsigned) base; \
     __res; })*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int printf(const char* __restrict, ...);
+int putchar(int);
+int puts(const char*);
 int sprint(char *buf, const char *fmt, ...);
 int vsprint(char *buf, const char *fmt, va_list args);
-int print(const char *fmt, ...);
-int putchar(int ch);
-int puts(const char *str);
+#ifdef __cplusplus
+}
+#endif
+
 #endif

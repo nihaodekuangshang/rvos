@@ -1,8 +1,5 @@
-#include "kelio.h"
-#include "string.h"
-#include "io.h"
-#include "kelarg.h"
-
+#include <stdarg.h>
+#include <stdio.h>
 int sprint(char *buf, const char *fmt, ...)
 {
     //记录fmt对应的地址
@@ -292,26 +289,3 @@ int sprint(char *buf, const char *fmt, ...)
     *str = '\0';
     return str - buf;
  }
-int putchar(int ch)
-{
-	_print_c(ch);
-	return 1;
-}
-int puts(const char *str)
-{
-	int i = print(str);
-	return i;
-}
-
-int print(const char *fmt, ...)
-{
-    int i;
-    char buf[256];
-
-    va_list args;
-    va_start(args, fmt);
-    i = vsprint(buf,fmt,args);
-
-	_print_str(buf);
-    return i;
-}

@@ -6,3 +6,4 @@ target/
 bin/
 compile_commands.json
 test/
+sysroot/
