@@ -2,8 +2,8 @@
 #define __IO__RVOS_H
 #define STDOUT 1
 #include "syscall.h"
-#include "keldef.h"
-#include "kelarg.h"
+
+#include <stdarg.h>
 
 #define STDOUT 1
 

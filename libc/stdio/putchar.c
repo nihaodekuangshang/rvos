@@ -5,7 +5,7 @@
 #include <kelio.h>
 #endif
 
-int putchar(int ic) {
+int putchar(char ic) {
 #if defined(__is_libk)
  	_print_c(ic);
 #else

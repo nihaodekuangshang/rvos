@@ -1,5 +1,5 @@
 #include "lib.h"
-#include "keldef.h"
+#include <stddef.h>
 int32_t main()
 {
 	print("Hello,world");

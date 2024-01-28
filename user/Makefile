@@ -29,7 +29,7 @@ BINS := $(patsubst $(APP_DIR)/%.c, $(BIN_DIR)/%.bin, $(APPS))
 
 elf: $(OBJS) $(LIB)
 	@$(foreach obj, $(OBJS),\
-		$(LD) $(obj) $(LIB)  -T src/linker.ld \
+		$(LD) $(obj) $(LIB)   \
 		-o $(patsubst $(TARGET_DIR)/%.o, \
 		$(TARGET_DIR)/%, $(obj));)
 	
@@ -41,13 +41,15 @@ target/%.o:src/%.s
 	$(CC)  $< -nostdlib -c  -o $@
 
 target/%.o:src/%.c
-	$(CC)  $< -nostdlib -std=c2x  -I./src/include \
-		-I./src/lib/include -I../os/src/include/ \
+	$(CC)  $< -nostdlib -std=c2x --sysroot=../sysroot \
+		-isystem=/usr/include -I./src/include  -Iinclude\
+		-I./src/lib/include  \
 		-c -o $@
 
 target/%.a:src/lib/%.c
-	$(CC)  $< -nostdlib -std=c2x   -I./src/include \
-		-I./src/lib/include  -I../os/src/include/\
+	$(CC)  $< -nostdlib -std=c2x --sysroot=../sysroot/ \
+		-Iinclude -I./src/include \
+		 -isystem=/usr/include -I./src/lib/include  \
 		-c -o $@
 
 binary: elf

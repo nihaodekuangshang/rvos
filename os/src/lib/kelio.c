@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-static bool  _print_c(char c) 
+bool  _print_c(char c) 
 {
 	enum DebugConsoleFID fid = DebugConsoleWriteByte;
 	struct Sbiret  ret = ecall( DEBUGCONSOL, fid, c, 0, 0);
@@ -12,7 +12,7 @@ static bool  _print_c(char c)
 		return false;
 	}
 }
-static long _print_str(const char* str)
+long _print_str(const char* str)
 {
 	unsigned long len = 0;
 	for (int i = 0;str[i] != '\0';i++) {

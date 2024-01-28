@@ -1,11 +1,17 @@
 #include "sbi.h"
-#include "stdio.h"
-
-
+#include <stdio.h>
+#include "batch.h"
 
 void sbss();
 void ebss();
 void clearBss();
+__attribute((constructor)) void init()
+{
+	clearBss();
+	init_app_man();
+
+}
+
 int main(int argc, char **argv, char** envp)
 {
 	//	获取环境变量，需要验证子字符串
@@ -15,9 +21,8 @@ int main(int argc, char **argv, char** envp)
 //	 char* thisEnv = *env;
 //	 if(thisEnv == ""
 //	}
-	clearBss();
-	printf("lkjj");
 	shutdown();
+	printf("loading system...");
 	while (1) {}
 	return 0;
 }

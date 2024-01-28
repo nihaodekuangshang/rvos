@@ -22,10 +22,13 @@ llvm)
 	fi
 	;;
 rustc)
-	echo 1.74.1
+	echo nightly-2023-10-09
 	;;
 bindgen)
 	echo 0.65.1
+	;;
+cbindgen)
+	echo 0.26.0
 	;;
 make)
 	echo 4.4.1
@@ -69,16 +72,31 @@ bindgen)
 	if ! type -p $2 &>/dev/null
 	then 
 		cargo install --locked --version \
-			$(min-tool-ver bindgen) bindgen-cli
+			$(min_tool_ver bindgen) bindgen-cli
 	fi
 	v=$($2 --version 2>&1 | grep -E -o '[0-9]+\.[0-9\.]+[a-z]*' | head -n1)
 	if [[ $v != $3 ]]
 	then
 		cargo install --locked --version \
-			$(min-tool-ver bindgen) bindgen-cli
+			$(min_tool_ver bindgen) bindgen-cli
 	fi
      printf "OK:    %-9s %-6s = $3\n" "$1" "$v"; return 0;
 	;;
+cbindgen)
+	if ! type -p $2 &>/dev/null
+	then 
+		cargo install --locked --version \
+			$(min_tool_ver cbindgen) cbindgen
+	fi
+	v=$($2 --version 2>&1 | grep -E -o '[0-9]+\.[0-9\.]+[a-z]*' | head -n1)
+	if [[ $v != $3 ]]
+	then
+		cargo install --locked --version \
+			$(min_tool_ver cbindgen) bindgen
+	fi
+     printf "OK:    %-9s %-6s = $3\n" "$1" "$v"; return 0;
+	;;
+
 *)
    if ! type -p $2 &>/dev/null
    then 
@@ -99,6 +117,7 @@ esac
 
 ver_check rust   rustc $(min_tool_ver rustc )
 ver_check bindgen   bindgen $(min_tool_ver bindgen )
+ver_check cbindgen   cbindgen $(min_tool_ver cbindgen )
 ver_check riscv64-linux-gnu-binutils riscv64-linux-gnu-as \
 	$(min_tool_ver riscv64-linux-gnu-binutils)
 ver_check riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc \
