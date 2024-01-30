@@ -1,4 +1,4 @@
-#include "syscall.h"
+#include "include/syscall.h"
 
 int64_t syscall(uint64_t id, uint64_t args[3])
 {
@@ -24,19 +24,11 @@ int64_t sys_write(uint64_t fd, uint8_t* buffer)
 		len = i;
 	 }
 	uint64_t tmp[3] = {fd,buffer,len + 1};
-	syscall(SYSCALL_WRITE, tmp);
+	syscall(SYS_WRITE, tmp);
 }
 
 int64_t sys_exit(int32_t exit_code)
 {
 	uint64_t tmp[3] = {exit_code,0,0};
-	return syscall(SYSCALL_EXIT, tmp);
-}
-int64_t write(uint64_t fd, uint8_t *buf) 
-{
-    return sys_write(fd, buf);
-}
-int64_t exit(int32_t exit_code) 
-{
-    return sys_exit(exit_code);
+	return syscall(SYS_EXIT, tmp);
 }

@@ -1,5 +1,4 @@
-#include <stddef.h>
-#include "syscall.h"
+#include <stdlib.h>
 int main();
 //void sbss();
 //void ebss();

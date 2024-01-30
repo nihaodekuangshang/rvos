@@ -1,7 +1,7 @@
-#include "lib.h"
+#include <stdio.h>
 #include <stddef.h>
 int32_t main()
 {
-	print("Hello,world");
+	printf("Hello,world\n");
     return 0;
 }

@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
-
+#include "context.h"
 
 #define APP_BASE_ADDRESS 2151677952
 
@@ -25,37 +25,27 @@
 #define MAX_APP_NUM 16
 
 #define USER_STACK_SIZE (4096 * 2)
+struct app_manage {
+	uint64_t num;
+	uint64_t cur;
+	uint64_t ads[MAX_APP_NUM + 1];
+	
+};
+struct kel_stack{
+	uint8_t data[KERNEL_STACK_SIZE];
+};
+struct usr_stack{
+	uint8_t data[USER_STACK_SIZE];
+};
+uint64_t get_usr_sp(struct usr_stack *uss);
+uint64_t get_kel_sp(struct kel_stack *kes);
+extern struct app_manage app_manager;
+extern struct usr_stack user_stack;
+extern struct kel_stack kernel_stack;
+extern struct trap_cont trap_context;
 
-typedef struct AppManager AppManager;
-
-typedef struct KernelStack KernelStack;
-
-typedef struct UserStack UserStack;
-
-extern struct AppManager APP_MAN;
-
-extern const struct KernelStack KERNEL_STACK;
-
-extern const struct UserStack USER_STACK;
-
- size_t get_kl_sp(const struct KernelStack * self) ;
-
- size_t get_us_sp(const struct UserStack * self) ;
-
- void init_app_man(void) ;
-
- struct AppManager new(void) ;
-
-extern int printf(const char *fmt,...);
-
-extern int putchar(int c);
-
-extern int puts(const char *s);
-
-extern int sprintf(char *buf, const char *fmt,...);
-
-extern int vsprintf(char *buf, const char *fmt, va_list args);
-
+void init_batch();
+void  run_next_app();
 #endif /* mozilla_wr_bindings_h */
 
 /* Text to put at the end of the generated file */

@@ -13,8 +13,14 @@ LIBDIR:=$(EXEC_PREFIX)/lib
 INCLUDEDIR:=$(PREFIX)/include
 
 
-KELDIR ?= ../os/src/lib/include/kelio.h
+KELDIR := ../os/src/lib/include/kelio.h \
+	  ./arch/riscv64/kernel/syscall/include/syscall.h
 
+define \n
+
+
+
+endef
 
 CFLAGS:=-O2 -g 
 CPPFLAGS:=
@@ -52,7 +58,6 @@ LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS=\
-$(ARCH_FREEOBJS) \
 stdio/putchar.o \
 stdio/puts.o \
 stdio/printf.o \
@@ -65,6 +70,8 @@ string/memmove.o \
 string/memset.o \
 string/strlen.o \
 string/strnlen.o \
+$(ARCH_FREEOBJS) \
+
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \
@@ -75,17 +82,22 @@ $(HOSTEDOBJS) \
 
 LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 
-#BINARIES=libc.a libk.a # Not ready for libc yet.
-BINARIES=libk.a
+BINARIES=libc.a libk.a # Not ready for libc yet.
+#BINARIES=libk.a
 
-.PHONY: all clean install install-headers install-libs
+.PHONY: all clean install install-headers install-libs build_ah
 .SUFFIXES: .o .libk.o .c .S
 
-all: install-libs
+all:  install-libs
 
-libc.a: $(OBJS)
+libc.a:  $(OBJS)
 	$(AR) rcs $@ $(OBJS)
 
+
+build_ah:
+	$(foreach obj,$(ARCH_HOSTEDOBJS),\
+		$(CC) -MD -c $(patsubst %.o,%.c,$(obj)) -o $(obj) \
+		-std=c2x $(CFLAGS) $(CPPFLAGS)${\n})
 libk.a: install-headers $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
@@ -111,11 +123,11 @@ install: install-headers install-libs
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)/kernel
 	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
-	@$(foreach file,$(KELDIR),\
-		cp -R --preserve=timestamps $(file) $(DESTDIR)$(INCLUDEDIR)/kernel/)
+	$(foreach file,$(KELDIR),\
+		cp -R --preserve=timestamps $(file) $(DESTDIR)$(INCLUDEDIR)/kernel/ ${\n})
 	
 
-install-libs: $(BINARIES)
+install-libs: build_ah $(BINARIES)
 	mkdir -p $(DESTDIR)$(LIBDIR)
 	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 

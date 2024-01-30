@@ -2,7 +2,7 @@
 #define __RISCV_RVOS_H
 
 #ifndef __ASSEMBLER__
-#include "keldef.h"
+#include <stddef.h>
 // which hart (core) is this?
 static inline uint64_t
 r_mhartid()

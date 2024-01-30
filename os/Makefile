@@ -15,7 +15,8 @@ TARGET_DIR := ./target
 SYSROOT ?= ../sysroot
 
 #Flags
-INCLUDE := -I./src/include/ -I./src/lib/include/
+INCLUDE := -I./src/include -I./src/lib/include -I./src/trap/include \
+	   -I./src/syscall/include -Iinclude 
 CC_FLAGS := -nostdlib -std=c2x  --sysroot=../sysroot/ \
 	    -isystem=/usr/include/ $(INCLUDE) -c
 RS_FLAGS := -L./target -L$(SYSROOT)/usr/lib/  --crate-type=staticlib   \
@@ -55,8 +56,7 @@ C_FILES := $(foreach dir,$(C_DIR),$(wildcard $(dir)/*.c ))
 ASM_DIR := ./src ./src/trap 
 ASM_FILES := $(foreach dir,$(ASM_DIR),$(wildcard $(dir)/*.S ))
 RS_DIR := 
-RS_FILES :=  src/batch.rs  \
-	    $(foreach dir,$(RS_DIR),$(wildcard $(dir)/*.rs ))
+RS_FILES := $(foreach dir,$(RS_DIR),$(wildcard $(dir)/*.rs ))
 
 RS_REQ := $(TARGET_DIR)/liblang_item.rlib
 CH_FILES := 
@@ -64,9 +64,11 @@ RH_FILES := #src/batch.rs
 
 # Object
 
-OBJ = target/entry.o target/main.o   target/link_app.o
+OBJ = target/entry.o target/main.o   target/link_app.o target/batch.o \
+      target/context.o target/trap.o target/trap_cont.o  target/syscall.o \
+      target/exit.o target/fs.o
 
-LIBS := target/libbatch.a $(SYSROOT)/usr/lib/libk.a  \
+LIBS :=  $(SYSROOT)/usr/lib/libk.a  \
 	target/kelio.a  target/sbi.a
 
 define \n 
@@ -103,8 +105,7 @@ kernel: build_kernel
 	$(LD) $(OBJ) $(LIBS) -T src/linker.ld  -o $(KERNEL_ELF)
 	@rm src/linker.ld
 
-build_kernel: binding_cheader build_rs binding_rheader \
-	build_c build_asm $(LIBS)
+build_kernel: build_c build_asm $(LIBS)
 
 binding_cheader:
 

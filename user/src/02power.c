@@ -1,5 +1,6 @@
 
-#include "lib.h"
+#include <stdio.h>
+#include <stddef.h>
 
 #define  SIZE 10
 #define  P 3
@@ -16,9 +17,9 @@ int32_t main()
 		index = (index + 1) % SIZE;
 		pow[index] = last * P % MOD;
 		if (i % 10000 == 0) {
-			print("%d^%d=%du(MOD %d)", P, i, pow[index], MOD);
+			printf("%d^%d=%du(MOD %d)\n", P, i, pow[index], MOD);
 		}
 	}
-	print("Test power OK!");
+	printf("Test power OK!\n");
 	return 0;
 }

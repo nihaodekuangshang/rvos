@@ -2,7 +2,8 @@
 
 #if defined(__is_libk)
 //#include <kernel/tty.h>
-#include <kelio.h>
+#include <kernel/kelio.h>
+#include <kernel/syscall.h>
 #endif
 
 int putchar(char ic) {
@@ -10,6 +11,7 @@ int putchar(char ic) {
  	_print_c(ic);
 #else
 	// TODO: Implement stdio and the write system call.
+	printf("%c",ic);
 #endif
 	return ic;
 }
