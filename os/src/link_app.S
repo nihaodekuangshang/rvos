@@ -14,33 +14,33 @@ _num_app:
     .global app_0_start
     .global app_0_end
 app_0_start:
-    .incbin "../usr/target/jk.bin"
+    .incbin "../user/bin/00hello_world.bin"
 app_0_end:
 
     .section .data
     .global app_1_start
     .global app_1_end
 app_1_start:
-    .incbin "../usr/target/jkp.bin"
+    .incbin "../user/bin/01store_fault.bin"
 app_1_end:
 
     .section .data
     .global app_2_start
     .global app_2_end
 app_2_start:
-    .incbin "../usr/target/jkplkk.bin"
+    .incbin "../user/bin/02power.bin"
 app_2_end:
 
     .section .data
     .global app_3_start
     .global app_3_end
 app_3_start:
-    .incbin "../usr/target/jkplkkm.bin"
+    .incbin "../user/bin/03priv_inst.bin"
 app_3_end:
 
     .section .data
     .global app_4_start
     .global app_4_end
 app_4_start:
-    .incbin "../usr/target/lo.bin"
+    .incbin "../user/bin/04priv_csr.bin"
 app_4_end:

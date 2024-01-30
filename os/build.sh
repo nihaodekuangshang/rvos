@@ -1,6 +1,6 @@
 #!/bin/bash
 c=0
-for file in `ls  ../usr/bin/`
+for file in `ls  ../user/bin/`
 do
 	apps[$c]=$file
 	((c++))
@@ -27,7 +27,7 @@ let "apps_len++"
 
 c=0
 apps_len=${#apps[@]}
-target_path="../usr/target/"
+target_path="../user/bin/"
 while (($c < $apps_len)) 
 do
 	echo "
@@ -35,7 +35,7 @@ do
     .global app_${c}_start
     .global app_${c}_end
 app_${c}_start:
-    .incbin \"${target_path}${apps[$c]}.bin\"
+    .incbin \"${target_path}${apps[$c]}\"
 app_${c}_end:"        >> $filelink
 	let "c++"
 done

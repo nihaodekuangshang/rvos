@@ -1,12 +1,22 @@
 #include "sbi.h"
-#include "io.h"
-
+#include <stdio.h>
+#include "trap.h"
+#include "batch.h"
 
 void sbss();
 void ebss();
 void clearBss();
+__attribute((constructor)) void init()
+{
+	clearBss();
+	init_trap();
+	init_batch();
+
+}
+
 int main(int argc, char **argv, char** envp)
 {
+	init();
 	//	获取环境变量，需要验证子字符串
 //	char** env;
 //	for (env = envp; *env != 0; env++)
@@ -14,9 +24,8 @@ int main(int argc, char **argv, char** envp)
 //	 char* thisEnv = *env;
 //	 if(thisEnv == ""
 //	}
-	clearBss();
-	print("this is a test: %x",16);
-	shutdown();
+	printf("loading system...");
+	run_next_app();
 	while (1) {}
 	return 0;
 }

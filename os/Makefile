@@ -4,13 +4,23 @@ CC := $(TGT)gcc
 LD := $(TGT)ld
 GDB := $(TGT)gdb
 AR := $(TGT)ar
-MODE := release
+RUSTC := rustc
+MODE := dubug
 KERNEL_ELF := target/os
 KERNEL_BIN := $(KERNEL_ELF).bin
 DISASM_TMP := target/asm
-FS_IMG := ../user/target/$(TARGET)/$(MODE)/fs.img
-APPS := ../user/src/bin/*
+FS_IMG := ../user/target/fs.img
+APPS := ../user/src/*
+TARGET_DIR := ./target
+SYSROOT ?= ../sysroot
 
+#Flags
+INCLUDE := -I./src/include -I./src/lib/include -I./src/trap/include \
+	   -I./src/syscall/include -Iinclude 
+CC_FLAGS := -nostdlib -std=c2x  --sysroot=../sysroot/ \
+	    -isystem=/usr/include/ $(INCLUDE) -c
+RS_FLAGS := -L./target -L$(SYSROOT)/usr/lib/  --crate-type=staticlib   \
+	    --edition=2021 --target=riscv64gc-unknown-none-elf 
 # BOARD
 BOARD := qemu
 SBI ?= opensbi
@@ -23,8 +33,9 @@ ifeq ($(GUI), off)
 endif
 
 # Building mode argument
-ifeq ($(MODE), release)
-	MODE_ARG := --release
+ifeq ($(MODE), debug)
+	CC_FLAGS += -g
+	DISASM := -D -S
 endif
 
 # KERNEL ENTRY
@@ -35,55 +46,121 @@ OBJDUMP := $(TGT)objdump
 OBJCOPY := $(TGT)objcopy #--binary-architecture=riscv64
 
 # Disassembly
-DISASM ?= -D -S
+DISASM ?= -D
+
+
+#File
+
+C_DIR = ./src ./src/trap ./src/syscall
+C_FILES := $(foreach dir,$(C_DIR),$(wildcard $(dir)/*.c ))
+ASM_DIR := ./src ./src/trap 
+ASM_FILES := $(foreach dir,$(ASM_DIR),$(wildcard $(dir)/*.S ))
+RS_DIR := 
+RS_FILES := $(foreach dir,$(RS_DIR),$(wildcard $(dir)/*.rs ))
+
+RS_REQ := $(TARGET_DIR)/liblang_item.rlib
+CH_FILES := 
+RH_FILES := #src/batch.rs
 
 # Object
 
-OBJ = target/entry.o target/main.o  target/io.o  
+OBJ = target/entry.o target/main.o   target/link_app.o target/batch.o \
+      target/context.o target/trap.o target/trap_cont.o  target/syscall.o \
+      target/exit.o target/fs.o
 
-LIB := target/string.a  target/kelio.a  target/sbi.a
+LIBS :=  $(SYSROOT)/usr/lib/libk.a  \
+	target/kelio.a  target/sbi.a
+
+define \n 
+
+
+
+endef
 
 # Run usertests or usershell
 TEST ?=
 
-build:  $(KERNEL_BIN) 
+build: env  $(KERNEL_BIN) 
 
 
-$(KERNEL_BIN): kernel
+env:
+	@bash env.sh
+
+$(KERNEL_BIN):apps  kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
+
+apps: $(APPS)
+	@cd ../user && make build TEST=$(TEST)
 
 fs-img: $(APPS)
 	@cd ../user && make build TEST=$(TEST)
 	@rm -f $(FS_IMG)
-	@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/riscv64gc-unknown-none-elf/release/
+	#@cd ../easy-fs-fuse && cargo run --release -- -s ../user/src/bin/ -t ../user/target/riscv64gc-unknown-none-elf/release/
 
 $(APPS):
 
 kernel: build_kernel
 	@echo Platform: $(BOARD)
 	@cp src/linker-$(BOARD).ld src/linker.ld
-	@$(LD) $(OBJ) $(LIB)  -T src/linker.ld  -o $(KERNEL_ELF)
+	$(LD) $(OBJ) $(LIBS) -T src/linker.ld  -o $(KERNEL_ELF)
 	@rm src/linker.ld
 
-build_kernel:$(OBJ) $(LIB)
+build_kernel: build_c build_asm $(LIBS)
 
-target/%.o:src/%.s
-	$(CC)  $< -nostdlib -g  -c -o $@
+binding_cheader:
 
-target/%.o:src/%.c
-	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include  -c -o $@
+
+binding_rheader:
+	$(foreach file,$(RH_FILES),cbindgen $(file) \
+		--config ./cbindgen.toml \
+		-o $(patsubst %.rs,$(dir $(file))/include/%.h,$(notdir $(file))) ${\n})
+
+build_rs: $(RS_REQ)
+	$(foreach file,$(RS_FILES),$(RUSTC) $(file) $(RS_FLAGS) \
+		--crate-name=$(patsubst %.rs,%,$(notdir $(file)))   \
+		--out-dir $(TARGET_DIR) ${\n})
+
+$(RS_REQ): src/lang_item.rs
+	$(RUSTC) src/lang_item.rs   \
+ 		-L./target   --crate-type=rlib   \
+		--edition=2021 --target=riscv64gc-unknown-none-elf  \
+		--crate-name=lang_item --out-dir $(TARGET_DIR) 
+
+build_c:
+	echo $(C_FILES)
+	$(foreach file,$(C_FILES),$(CC) $(file) $(CC_FLAGS) -o \
+		$(patsubst %.c,$(TARGET_DIR)/%.o,$(notdir $(file))) ${\n})
+
+
+build_asm:
+	bash ./build.sh
+	$(foreach file,$(ASM_FILES),$(CC) $(file) -nostdlib -g -c -o  \
+		$(patsubst %.S,$(TARGET_DIR)/%.o,$(notdir $(file))) ${\n})
+#target/%.o:src/%.s
+	#$(CC)  $< -nostdlib -g  -c -o $@
+#
+#target/%.o:src/%.c
+	#$(CC)  $< -nostdlib -std=c2x -g  -I./src/include  -c -o $@
 
 target/%.a:src/lib/%.c
-	$(CC)  $< -nostdlib -std=c2x -g  -I./src/include -c -o target/a.out
-	$(AR)  -rc $@  target/a.out
-	@rm target/a.out
+	$(CC)  $< $(CC_FLAGS) -o $(patsubst %.c,\
+		$(TARGET_DIR)/%.o,$(notdir $<))
+	$(AR)  -rcs $@  $(patsubst %.c,\
+		$(TARGET_DIR)/%.o,$(notdir $<))
+	rm $(patsubst %.c,\
+		$(TARGET_DIR)/%.o,$(notdir $<))
 
+$(SYSROOT)/usr/lib/libk.a:
+	@pushd ../libc/
+	@make 
+	@popd
 
 clean:
 	@rm target/*.o   $(KERNEL_ELF)
 
 clean_all:
-	@rm target/*.o target/*.a  $(KERNEL_ELF)
+	@rm target/*.o target/*.a  target/*.rlib \
+		$(KERNEL_ELF) $(KERNEL_BIN)
 
 
 disasm: kernel
@@ -97,6 +174,7 @@ disasm-vim: kernel
 run: run-inner
 
 QEMU_ARGS := -machine virt \
+			 -m 512M  \
 			 -nographic \
 			 -bios $(BOOTLOADER) \
 			 -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) 

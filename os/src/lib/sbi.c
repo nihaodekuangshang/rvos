@@ -1,17 +1,4 @@
 #include "sbi.h"
-const long SBISUCCESS = 0; //顺利完成
-const long SBIERRFAILED = -1; //失败
-const long SBIERRNOTSUPPORTED = -2; //不支持操作
-const long SBIERRINVALIDPARAM = -3; //非法参数
-const long SBIERRDENIED = -4; //拒绝
-const long SBIERRINVALIDADDRESS = -5; //非法地址
-const long SBIERRALREADYAVAILABLE = -6; //（资源）已可用
-const long SBIERRALREADYSTARTED = -7; //（操作）已启动
-const long SBIERRALREADYSHOPPED = -8; //（操作）已停止
-const long SBIERRNOSHMEM = -9; //共享内存不可用
-const unsigned long BASICEXTEND = 0x10; //基本扩展
-const unsigned long DEBUGCONSOL = 0x4442434E; // 调试控制台扩展
-const unsigned long SYSTEMRESET = 0x53525354; //系统复位扩展 SRST
 struct Sbiret ecall(
 		unsigned long eid, 
 		unsigned long fid, 
