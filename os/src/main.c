@@ -1,7 +1,10 @@
 #include "sbi.h"
 #include <stdio.h>
 #include "trap.h"
-#include "batch.h"
+#include <stddef.h>
+#include "task.h"
+#include "loader.h"
+#include "timer.h"
 
 void sbss();
 void ebss();
@@ -10,7 +13,10 @@ __attribute((constructor)) void init()
 {
 	clearBss();
 	init_trap();
-	init_batch();
+	init_loader();
+	load_apps();
+	init_task();
+	init_time();
 
 }
 
@@ -24,8 +30,9 @@ int main(int argc, char **argv, char** envp)
 //	 char* thisEnv = *env;
 //	 if(thisEnv == ""
 //	}
-	printf("loading system...");
-	run_next_app();
+	printf("loading system...\n");
+	set_next_trigger();
+	run_first_task(&task_man);
 	while (1) {}
 	return 0;
 }

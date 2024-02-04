@@ -19,12 +19,12 @@ endef
 
 
 SYSROOT := ../sysroot
-INCLUDES := -I./src/include -Iinclude -I./src/lib/include
-CC_FLAGS := -nostdlib -std=c2x --sysroot=../sysroot \
-		-isystem=/usr/include  $(INCLUDES) \
+INCLUDES := -I./src/include -Iinclude -I./src/lib/include\
+	    -I
+CC_FLAGS := -nostdlib -std=c2x $(INCLUDES) \
 		-c -g  
 
-
+BIN ?= 
 APP_DIR := src
 LIB_DIR := src/lib
 TARGET_DIR := target
@@ -39,7 +39,6 @@ BINS := $(patsubst $(APP_DIR)/%.c, $(BIN_DIR)/%.bin, $(APPS))
 
 
 elf: $(OBJS) $(LIB) $(CRTI)
-	echo $(OBJS)
 	$(foreach obj, $(OBJS),\
 		$(LD) $(CRTI) $(obj) $(LIB)   \
 		-T src/linker.ld \
@@ -62,6 +61,17 @@ binary: elf
 	@$(foreach elf, $(ELFS), $(OBJCOPY) $(elf) --strip-all -O binary $(patsubst $(TARGET_DIR)/%, $(BIN_DIR)/%.bin, $(elf)) ${\n})
 
 build: binary
+
+build_bin: $(patsubst %.c,$(TARGET_DIR)/%.o,$(notdir $(BIN))) \
+	$(CRTI) $(LIB)
+		$(LD) $(CRTI) $< $(LIB)   \
+		-T src/linker.ld \
+		-o $(patsubst $(TARGET_DIR)/%.o, \
+		$(TARGET_DIR)/%, $<) 
+		 $(OBJCOPY) $(patsubst %.o,%,$<) \
+			 --strip-all -O binary \
+			 $(patsubst $(TARGET_DIR)/%, \
+			 $(BIN_DIR)/%.bin, $(patsubst %.o,%,$<)) 
 
 
 

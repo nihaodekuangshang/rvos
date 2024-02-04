@@ -16,9 +16,9 @@ SYSROOT ?= ../sysroot
 
 #Flags
 INCLUDE := -I./src/include -I./src/lib/include -I./src/trap/include \
-	   -I./src/syscall/include -Iinclude 
-CC_FLAGS := -nostdlib -std=c2x  --sysroot=../sysroot/ \
-	    -isystem=/usr/include/ $(INCLUDE) -c
+	   -I./src/syscall/include -Iinclude  -I./src/task/include \
+	   -I$(SYSROOT)/usr/include
+CC_FLAGS := -nostdlib -std=c2x   $(INCLUDE) -c
 RS_FLAGS := -L./target -L$(SYSROOT)/usr/lib/  --crate-type=staticlib   \
 	    --edition=2021 --target=riscv64gc-unknown-none-elf 
 # BOARD
@@ -51,9 +51,9 @@ DISASM ?= -D
 
 #File
 
-C_DIR = ./src ./src/trap ./src/syscall
+C_DIR = ./src ./src/trap ./src/syscall ./src/task
 C_FILES := $(foreach dir,$(C_DIR),$(wildcard $(dir)/*.c ))
-ASM_DIR := ./src ./src/trap 
+ASM_DIR := ./src ./src/trap  ./src/task
 ASM_FILES := $(foreach dir,$(ASM_DIR),$(wildcard $(dir)/*.S ))
 RS_DIR := 
 RS_FILES := $(foreach dir,$(RS_DIR),$(wildcard $(dir)/*.rs ))
@@ -64,9 +64,22 @@ RH_FILES := #src/batch.rs
 
 # Object
 
-OBJ = target/entry.o target/main.o   target/link_app.o target/batch.o \
-      target/context.o target/trap.o target/trap_cont.o  target/syscall.o \
-      target/exit.o target/fs.o
+OBJ =\
+target/entry.o \
+target/main.o \
+target/link_app.o \
+target/loader.o \
+target/task.o \
+target/taskContext.o \
+target/switch.o \
+target/trap.o \
+target/trap_cont.o \
+target/context.o \
+target/timer.o \
+target/syscall.o \
+target/process.o \
+target/fs.o \
+
 
 LIBS :=  $(SYSROOT)/usr/lib/libk.a  \
 	target/kelio.a  target/sbi.a
@@ -90,7 +103,7 @@ $(KERNEL_BIN):apps  kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
 apps: $(APPS)
-	@cd ../user && make build TEST=$(TEST)
+	@cd ../user && bash ./build_lk.sh
 
 fs-img: $(APPS)
 	@cd ../user && make build TEST=$(TEST)

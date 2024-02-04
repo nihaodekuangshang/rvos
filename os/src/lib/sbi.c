@@ -1,4 +1,5 @@
 #include "sbi.h"
+#include <stdint.h>
 struct Sbiret ecall(
 		unsigned long eid, 
 		unsigned long fid, 
@@ -45,4 +46,13 @@ void shutdown_err(){
         0
     );
 	while (1){}
+}
+
+
+
+void set_timer(uint64_t timer) 
+{
+
+	ecall(TIMEEXTEND,time_set_timer,timer,0,0);
+
 }

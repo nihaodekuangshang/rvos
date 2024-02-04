@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+void  panic(const char* restrict format, ...);
 int printf(const char* __restrict, ...);
 int putchar(char);
 int puts(const char*);

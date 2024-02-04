@@ -1,6 +1,7 @@
 #ifndef __SBI_RVOS__HEADER__
 #define __SBI_RVOS__HEADER__
 
+#include <stddef.h>
 #define SBISUCCESS  0 //顺利完成
 #define SBIERRFAILED  -1 //失败
 #define SBIERRNOTSUPPORTED  -2 //不支持操作
@@ -13,6 +14,7 @@
 #define SBIERRNOSHMEM  -9 //共享内存不可用
 #define BASICEXTEND  0x10 //基本扩展
 #define DEBUGCONSOL  0x4442434E // 调试控制台扩展
+#define TIMEEXTEND   0x54494D45 // 时钟扩展
 #define SYSTEMRESET  0x53525354 //系统复位扩展 SRST
 				//
 enum BasicFID {
@@ -33,6 +35,9 @@ enum DebugConsoleFID {
     DebugConsoleRead = 1,
     //struct sbiret sbi_debug_console_write_byte(uint8_t byte)
     DebugConsoleWriteByte = 2,
+};
+enum time_Fid {
+	time_set_timer = 0,
 };
 enum SRSTFID {
     SystemReset = 0,
@@ -57,5 +62,6 @@ struct Sbiret ecall( unsigned long eid, unsigned long fid,
 		unsigned long arg2);
 void shutdown();
 void shutdown_err();
+void set_timer(uint64_t timer);
 
 #endif

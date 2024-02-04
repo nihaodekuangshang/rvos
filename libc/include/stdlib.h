@@ -12,6 +12,8 @@ void abort(void);
 
 __attribute__((__noreturn__))
 void  exit(int32_t exit_code);
+int64_t yield();
+int64_t write(uint64_t fd, uint8_t *buf);
 #ifdef __cplusplus
 }
 #endif

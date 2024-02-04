@@ -32,3 +32,10 @@ int64_t sys_exit(int32_t exit_code)
 	uint64_t tmp[3] = {exit_code,0,0};
 	return syscall(SYS_EXIT, tmp);
 }
+
+int64_t sys_yield()
+{
+	uint64_t tmp[3] = {00,0,0};
+	return syscall(SYS_YIED, tmp);
+}
+

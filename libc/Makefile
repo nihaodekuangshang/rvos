@@ -58,12 +58,15 @@ LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
 
 FREEOBJS=\
+stdio/panic.o \
 stdio/putchar.o \
 stdio/puts.o \
 stdio/printf.o \
 stdio/sprintf.o \
 stdio/vsprintf.o \
 stdlib/abort.o \
+stdlib/process.o \
+stdlib/fs.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \

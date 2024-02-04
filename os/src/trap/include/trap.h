@@ -3,5 +3,5 @@
 #define DIRECT (0)
 #define VECTORED (1)
 void init_trap();
-struct trap_cont* trap_handler(struct trap_cont *tc);
+struct trap_context* trap_handler(struct trap_context *tc);
 #endif

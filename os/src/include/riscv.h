@@ -228,8 +228,11 @@ w_mscratch(uint64_t x)
 }
 
 // Supervisor Trap Cause
-#define SCAUSE_INT(sc) (((sc)&(1<<63))>>63)  // Interrupt 
-#define SCAUSE_ECO(sc) ((sc)&~(1<<63))  // Exception Code
+#define SCAUSE_CODE(sc) (((sc)<<1)>>1)  // Interrupt 
+#define SCAUSE_TYPE(sc) ((sc)>>63)  // Exception Code
+enum sc_interrupt{
+	SCI_SUP_TIME = 5,
+};
 enum sc_exception{
 SCE_INS_ADR_MIS,  //0 指令地址为对齐
 SCE_INS_ACC_FAU, //1 指令访问故障
@@ -285,12 +288,20 @@ r_mcounteren()
   return x;
 }
 
-// machine-mode cycle counter
+//真实时间
 static inline uint64_t
 r_time()
 {
   uint64_t x;
   __asm__ __volatile__("csrr %0, time" : "=r" (x) );
+  return x;
+}
+//时钟周期
+static inline uint64_t
+r_cycle()
+{
+  uint64_t x;
+  __asm__ __volatile__("csrr %0, cycle" : "=r" (x) );
   return x;
 }
 

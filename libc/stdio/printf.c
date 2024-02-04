@@ -5,6 +5,7 @@
 #include <string.h>
 #include <kernel/kelio.h>
 #include <kernel/syscall.h>
+#include <stdlib.h>
 
 static bool print(const char* data, size_t length) {
 #if defined( __is_libk)
