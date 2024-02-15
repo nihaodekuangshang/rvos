@@ -115,9 +115,9 @@ esac
 
 }
 
-ver_check rust   rustc $(min_tool_ver rustc )
-ver_check bindgen   bindgen $(min_tool_ver bindgen )
-ver_check cbindgen   cbindgen $(min_tool_ver cbindgen )
+#ver_check rust   rustc $(min_tool_ver rustc )
+#ver_check bindgen   bindgen $(min_tool_ver bindgen )
+#ver_check cbindgen   cbindgen $(min_tool_ver cbindgen )
 ver_check riscv64-linux-gnu-binutils riscv64-linux-gnu-as \
 	$(min_tool_ver riscv64-linux-gnu-binutils)
 ver_check riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc \

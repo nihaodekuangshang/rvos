@@ -22,11 +22,12 @@ void init_task()
 }
 void mark_sus(struct task_manager *tm)
 {
-	tm->tasks[task_man.cur].status = task_ready;
+	tm->tasks[tm->cur].status = task_ready;
+	//printf("mark sus  cur : %lx,Status:%lx\n",tm->cur,tm->tasks[tm->cur].status);
 }
 void mark_exit(struct task_manager *tm)
 {
-	tm->tasks[task_man.cur].status = task_exited;
+	tm->tasks[tm->cur].status = task_exited;
 }
 uint64_t  find_next_task(struct task_manager *tm) 
 {
@@ -46,6 +47,11 @@ uint64_t  find_next_task(struct task_manager *tm)
 void  run_next_task(struct task_manager *tm)
 {
 	uint64_t ne = find_next_task(tm);
+	//for (int i =0 ; i < tm->num;++i){
+		//printf("cur:%lx , i: %lx , status: %lx\n",tm->cur,i,tm->tasks[i].status);
+	//}
+	//printf("ne: %lx,Status:%lx\n",ne,tm->tasks[ne].status);
+	//printf("ne ra : %lx,\n",tm->tasks[ne].cont.ra);
 	if(ne >=0 && ne <tm->num){
 		usize cur = tm->cur;
 		tm->tasks[ne].status = task_running;
