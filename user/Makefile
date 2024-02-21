@@ -20,7 +20,7 @@ endef
 
 SYSROOT := ../sysroot
 INCLUDES := -I./src/include -Iinclude -I./src/lib/include\
-	    -I
+	    -I$(SYSROOT)/usr/include
 CC_FLAGS := -nostdlib -std=c2x $(INCLUDES) \
 		-c -g  
 
@@ -60,7 +60,17 @@ target/%.a:src/lib/%.c
 binary: elf
 	@$(foreach elf, $(ELFS), $(OBJCOPY) $(elf) --strip-all -O binary $(patsubst $(TARGET_DIR)/%, $(BIN_DIR)/%.bin, $(elf)) ${\n})
 
-build: binary
+build: build_dir  binary
+
+
+build_dir:
+	if [ ! -d $(TARGET_DIR) ]; then \
+	mkdir -p $(TARGET_DIR); \
+	fi
+
+	if [ ! -d $(BIN_DIR) ]; then \
+	mkdir -p $(BIN_DIR); \
+	fi
 
 build_bin: $(patsubst %.c,$(TARGET_DIR)/%.o,$(notdir $(BIN))) \
 	$(CRTI) $(LIB)

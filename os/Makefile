@@ -93,11 +93,11 @@ endef
 # Run usertests or usershell
 TEST ?=
 
-build: env  $(KERNEL_BIN) 
+build: env $(KERNEL_BIN) 
 
 
 env:
-	@bash env.sh
+	@SYSROOT=$(SYSROOT) TARGET_DIR=$(TARGET_DIR) bash env.sh
 
 $(KERNEL_BIN):apps  kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@

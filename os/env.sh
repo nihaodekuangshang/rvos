@@ -115,6 +115,19 @@ esac
 
 }
 
+check_lib_dir()
+{
+	if [ ! -f ${SYSROOT}/usr/lib/libk.a ]
+	then 
+		make -C ../libc  install
+	fi
+	if [ ! -d ${TARGET_DIR} ]
+	then 
+		mkdir -p ${TARGET_DIR} 
+	fi
+}
+
+
 #ver_check rust   rustc $(min_tool_ver rustc )
 #ver_check bindgen   bindgen $(min_tool_ver bindgen )
 #ver_check cbindgen   cbindgen $(min_tool_ver cbindgen )
@@ -124,3 +137,4 @@ ver_check riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc \
 	$(min_tool_ver riscv64-linux-gnu-gcc)
 ver_check bash bash $(min_tool_ver bash)
 ver_check make make $(min_tool_ver make)
+check_lib_dir
