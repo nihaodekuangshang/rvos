@@ -1,0 +1,30 @@
+#ifndef __FRAME_RVOS_H
+#define __FRAME_RVOS_H 1
+#include "stddef.h"
+#include "addr.h"
+void ekernel();
+#define MEM_END 0x80800000
+#define page_up(a) ((a+PAGE_SIZE-1)&~(PAGE_SIZE-1))
+#define page_down(a) ((a)&~(PAGE_SIZE-1))
+#define MAX_PAGE_NUM ((page_down(MEM_END)-page_up((uint64_t)0x80000000))/(PAGE_SIZE))
+struct frame_link_vec{
+	uint64_t cur;
+	uint64_t end;
+  uint64_t len;
+	ppn_t value[MAX_PAGE_NUM];
+	ppn_t (*pop)(struct frame_link_vec*);
+	void (*push)(struct frame_link_vec*,ppn_t);
+	bool (*find)(struct frame_link_vec* fl,ppn_t p);
+}fvec;
+struct  stack_frame_stuct{
+    //空闲内存的起始物理页号
+	ppn_t cur;  
+	//空闲内存的结束物理页号
+	ppn_t end;
+	//回收的页优先从这里分配
+	struct frame_link_vec* rec;
+	void (*init)(struct stack_frame_stuct*,ppn_t,ppn_t);
+	ppn_t (*alloc)(struct stack_frame_stuct*);
+	void (*dealloc)(struct stack_frame_stuct*,ppn_t);
+}stack_frame;
+#endif

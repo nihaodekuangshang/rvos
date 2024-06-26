@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include "context.h"
@@ -50,7 +51,7 @@ usize get_base_i( usize app_id)
 }
 usize  get_num_app()
 {
-	uint64_t* p = _num_app;
+	uint64_t* p = (uint64_t*)_num_app;
     return *p;
 }
 uint64_t   push_context(struct kernel_stack *ks,struct trap_context* tc)
@@ -59,7 +60,7 @@ uint64_t   push_context(struct kernel_stack *ks,struct trap_context* tc)
 	//uint64_t x[32];
 	//uint64_t sstatus;
 	//uint64_t sepc;
-	struct trap_context *tc_ptr = (struct trap_cont*)sp;
+	struct trap_context *tc_ptr = (struct trap_context*)sp;
 	tc_ptr->sstatus = tc->sstatus;
 	tc_ptr->sepc = tc->sepc;
 	for(int i = 0; i < 32; ++i){
@@ -78,6 +79,6 @@ uint64_t get_kel_sp(struct kernel_stack *kes)
 uint64_t init_app_ct(uint64_t id)
 {
 
-	init_app_context(&t_context,get_base_i(id),get_usr_sp(&u_stack));
+	init_app_context(&t_context,get_base_i(id),get_usr_sp((struct user_stack*)&u_stack));
 	return push_context(&k_stack[id],&t_context);
 }

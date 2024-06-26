@@ -37,8 +37,8 @@ int main(int argc, char **argv, char** envp)
 	return 0;
 }
 void clearBss(){
-	void (*psb)() = &sbss;
-	void (*peb)() = &ebss;
+	uint64_t* psb = (uint64_t*)&sbss;
+	uint64_t* peb = (uint64_t*)&ebss;
 	for(unsigned long *i = psb; i <= peb; i++){
 		*i = 0;
 	}
