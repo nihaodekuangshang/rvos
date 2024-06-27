@@ -1,10 +1,10 @@
 
-DEFAULT_HOST?=riscv64-linux-gnu
+DEFAULT_HOST?=riscv64-linux-gnu-
 HOST?=$(DEFAULT_HOST)
 
-AR:=$(HOST)-ar
-AS:=$(HOST)-as
-CC:=$(HOST)-gcc
+AR:=$(HOST)ar
+AS:=$(HOST)as
+CC:=$(HOST)gcc
 
 PREFIX:=/usr
 EXEC_PREFIX:=$(PREFIX)
@@ -39,6 +39,7 @@ endif
 HOSTARCH?=riscv64
 
 LDFLAGS?=
+
 LIBS?=
 
 DESTDIR?=$(SYSROOT)

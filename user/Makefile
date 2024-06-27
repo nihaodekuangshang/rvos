@@ -1,6 +1,6 @@
 
 # Building
-TGT=riscv64-linux-gnu-
+TGT?=riscv64-linux-gnu-
 CC := $(TGT)gcc
 LD := $(TGT)ld
 GDB := $(TGT)gdb

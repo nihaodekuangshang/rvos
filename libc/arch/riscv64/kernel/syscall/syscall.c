@@ -23,7 +23,7 @@ int64_t sys_write(uint64_t fd, uint8_t* buffer)
 	for (int i = 0;buffer[i] != '\0';i++) {
 		len = i;
 	 }
-	uint64_t tmp[3] = {fd,buffer,len + 1};
+	uint64_t tmp[3] = {fd,(uint64_t)&buffer,len + 1};
 	syscall(SYS_WRITE, tmp);
 }
 

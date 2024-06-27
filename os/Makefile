@@ -1,5 +1,16 @@
+OS := $(shell uname -a)
+IS_ARCH := $(shell echo $(OS)|grep -i  "arch")
+IS_DEBIAN := $(shell echo $(OS)|grep -i -E "msys|debian")
+ifdef IS_ARCH
+	TGT=riscv64-linux-gnu-
+else
+ifdef IS_DEBIAN
+	TGT=riscv64-unknown-elf-
+endif
+endif
+
+
 # Building
-TGT=riscv64-linux-gnu-
 CC := $(TGT)gcc
 LD := $(TGT)ld
 GDB := $(TGT)gdb
@@ -97,13 +108,13 @@ build: env $(KERNEL_BIN)
 
 
 env:
-	@SYSROOT=$(SYSROOT) TARGET_DIR=$(TARGET_DIR) bash env.sh
+	@SYSROOT=$(SYSROOT) TARGET_DIR=$(TARGET_DIR)  TGT=$(TGT) bash env.sh
 
 $(KERNEL_BIN):apps  kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
 apps: $(APPS)
-	@cd ../user && bash ./build_lk.sh
+	@TGT=$(TGT) make build -C ../user  && bash ./build.sh
 
 fs-img: $(APPS)
 	@cd ../user && make build TEST=$(TEST)

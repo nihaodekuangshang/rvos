@@ -8,10 +8,10 @@ if [ $# != 1 ]; then
 fi
 
 case "$1" in
-riscv64-linux-gnu-binutils)
+${TGT}binutils)
 	echo 2.39
 	;;
-riscv64-linux-gnu-gcc)
+${TGT}gcc)
 	echo 12.2.0
 	;;
 llvm)
@@ -119,7 +119,7 @@ check_lib_dir()
 {
 	if [ ! -f ${SYSROOT}/usr/lib/libk.a ]
 	then 
-		make -C ../libc  install
+		DEFAULT_HOST=${TGT} make -C ../libc  install
 	fi
 	if [ ! -d ${TARGET_DIR} ]
 	then 
@@ -131,10 +131,10 @@ check_lib_dir()
 #ver_check rust   rustc $(min_tool_ver rustc )
 #ver_check bindgen   bindgen $(min_tool_ver bindgen )
 #ver_check cbindgen   cbindgen $(min_tool_ver cbindgen )
-ver_check riscv64-linux-gnu-binutils riscv64-linux-gnu-as \
-	$(min_tool_ver riscv64-linux-gnu-binutils)
-ver_check riscv64-linux-gnu-gcc riscv64-linux-gnu-gcc \
-	$(min_tool_ver riscv64-linux-gnu-gcc)
+ver_check ${TGT}binutils ${TGT}as \
+	$(min_tool_ver ${TGT}binutils)
+ver_check ${TGT}gcc ${TGT}gcc \
+	$(min_tool_ver ${TGT}gcc)
 ver_check bash bash $(min_tool_ver bash)
 ver_check make make $(min_tool_ver make)
 check_lib_dir
