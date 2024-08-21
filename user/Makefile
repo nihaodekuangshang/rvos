@@ -84,6 +84,11 @@ build_bin: $(patsubst %.c,$(TARGET_DIR)/%.o,$(notdir $(BIN))) \
 			 $(BIN_DIR)/%.bin, $(patsubst %.o,%,$<)) 
 
 
+clean:
+	@rm target/*   
+
+clean_all:
+	@rm bin/*    target/*
 
 disasm: binary
 	@$(OBJDUMP) $(DISASM) $(KERNEL_ELF) | less
@@ -93,3 +98,5 @@ disasm-vim: binary
 		>> $(DISASM_TMP) ${\n})
 	@vim $(DISASM_TMP)
 	@rm $(DISASM_TMP)
+
+.PHONY: clean clean_all disasm disasm-vim build

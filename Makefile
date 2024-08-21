@@ -13,6 +13,8 @@ debug:
 
 clean:
 	@ cd ./os && make clean TEST=$(TEST)
+	@ cd ./user && make clean TEST=$(TEST)
+	@ cd ./libc && make clean TEST=$(TEST)
 disasm:
 	@ cd ./os && make disasm TEST=$(TEST)
 disasm-vim:

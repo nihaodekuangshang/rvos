@@ -114,7 +114,8 @@ $(KERNEL_BIN):apps  kernel
 	@$(OBJCOPY) $(KERNEL_ELF) --strip-all -O binary $@
 
 apps: $(APPS)
-	@TGT=$(TGT) make build -C ../user  && bash ./build.sh
+	@TGT=$(TGT) make build -C ../user  
+	@cd ../user && bash ./build_lk.sh
 
 fs-img: $(APPS)
 	@cd ../user && make build TEST=$(TEST)
@@ -210,7 +211,7 @@ run-inner: build
 	@qemu-system-riscv64 $(QEMU_ARGS)
 
 debug: build
-	@tmux new-session -d \
+	tmux new-session -d \
 		"qemu-system-riscv64 $(QEMU_ARGS) -s -S" && \
 		tmux split-window -h "$(GDB) -ex 'file $(KERNEL_ELF)' -ex 'set arch riscv:rv64' -ex 'target remote localhost:1234'" && \
 		tmux -2 attach-session -d
